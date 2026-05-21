@@ -7,165 +7,90 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
   <style>
-    /* ── Fotoğraf sarmalayıcı ── */
-    .yj-img-wrap {
-      width: 100%;
-      overflow: hidden;
-      background: #ddd;
-      /* flex ile büyür — metin az ise fotoğraf daha büyük, metin çok ise küçülür */
-      flex: 1;
-      min-height: 120px;
-    }
-    .yj-img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform .3s ease;
-    }
-    .card:hover .yj-img-wrap img { transform: scale(1.03); }
-
-    /* Üst spor/magazin: 16:9 sabit oran */
-    .yj-top .yj-img-wrap {
-      flex: none;
-      aspect-ratio: 16/9;
-    }
-
-    /* Manşet: serbest, ama minimum yükseklik */
-    .yj-manset .yj-img-wrap {
-      min-height: 200px;
-      max-height: 480px;
-    }
-
-    /* Sağ sütun: serbest, minimum yükseklik */
-    .yj-side .yj-img-wrap {
-      min-height: 100px;
-      max-height: 260px;
-    }
-
-    /* Izgara kartları (yatay) — sol fotoğraf tam yüksekliği kaplar */
-    .yj-grid-img {
-      width: 40%;
-      flex-shrink: 0;
-      overflow: hidden;
-      background: #ddd;
-      /* kart yüksekliği kadar uzar */
-      align-self: stretch;
-      min-height: 90px;
-    }
-    .yj-grid-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s; }
-    .card:hover .yj-grid-img img { transform: scale(1.04); }
-
-    /* Kart body: flex column — metin alanı sabit, fotoğraf kalanı alır */
-    .yj-card-body { display:flex; flex-direction:column; flex-shrink:0; padding:1rem; }
-    .yj-card-body .yj-title { flex-shrink:0; }
-    .yj-card-body .yj-summary { flex-shrink:0; }
-
-    /* Kart kendisi flex column → img-wrap büyür */
-    .yj-manset > a,
-    .yj-side > a {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    /* Tüm kartlar aynı yükseklikte olsun (row stretch) */
-    .yj-row-stretch { align-items: stretch; }
-    .yj-row-stretch > [class*="col"] { display: flex; flex-direction: column; }
-    .yj-row-stretch > [class*="col"] > .card { flex: 1; }
-
-    .card a:hover { opacity: .93; }
-    .card { transition: box-shadow .2s; }
-    .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.13) !important; }
-
-    /* Sidebar */
-    #sidebar { position:fixed;top:0;right:0;width:380px;height:100%;background:#fff;z-index:2100;
-               transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;
-               box-shadow:-4px 0 20px rgba(0,0,0,.2); }
-    #overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1900; }
-    .sb-slot { margin-bottom:12px;padding:10px 12px;background:#f8f9fa;border-radius:8px;border:1px solid #eee; }
-    .sb-slot-title { font-weight:700;font-size:.78rem;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px; }
-    .sb-url-row { display:flex;gap:5px;margin-bottom:5px; }
-    .sb-url-row input { flex:1;padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:.78rem;min-width:0; }
-    .sb-url-row button { background:#0d6efd;color:#fff;border:none;padding:4px 10px;border-radius:4px;
-                         cursor:pointer;font-size:.75rem;white-space:nowrap;flex-shrink:0; }
-    .sb-meta-row { display:flex;gap:5px;margin-bottom:5px; }
-    .sb-meta-row select, .sb-meta-row input[type=number] { padding:3px 6px;border:1px solid #ccc;border-radius:4px;font-size:.78rem; }
-    .sb-preview { font-size:.73rem;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .sidebar-open { transform: translateX(0) !important; }
+    .card a:hover { opacity: .92; }
   </style>
 </head>
 <body class="bg-light">
 
-<!-- ⚙ Butonu -->
+<!-- ⚙️ Dişli Buton -->
 <button onclick="openSidebar()"
-  style="position:fixed;top:12px;right:12px;z-index:2000;background:#dc3545;border:none;color:#fff;
-         width:42px;height:42px;border-radius:50%;font-size:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;">⚙</button>
+  style="position:fixed;top:12px;right:12px;z-index:2000;background:#dc3545;border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;">
+  ⚙
+</button>
 
-<div id="overlay" onclick="closeSidebar()"></div>
+<!-- Karartma -->
+<div id="overlay" onclick="closeSidebar()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1900;"></div>
 
-<!-- ══ SİDEBAR ══ -->
-<div id="sidebar">
+<!-- Sidebar -->
+<div id="sidebar"
+  style="position:fixed;top:0;right:0;width:370px;height:100%;background:#fff;z-index:2100;
+         transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,.2);">
+
   <div style="background:#dc3545;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
     <strong>⚙ Yönetim Paneli</strong>
     <button onclick="closeSidebar()" style="background:none;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;">✕</button>
   </div>
 
+  <!-- Güncelle -->
   <div style="padding:14px 16px;border-bottom:1px solid #eee;">
     <button id="sbFetch" onclick="doFetch()"
       style="width:100%;background:#dc3545;color:#fff;border:none;padding:10px;border-radius:6px;font-weight:600;cursor:pointer;margin-bottom:8px;">
       ↻ Haberleri Güncelle
     </button>
+    <button onclick="doProxyTest()"
+      style="width:100%;background:#6c757d;color:#fff;border:none;padding:7px;border-radius:6px;font-weight:600;cursor:pointer;margin-bottom:8px;font-size:.82rem;">
+      🔍 API Bağlantı Testi
+    </button>
     <div id="sbProgress" style="display:none;margin-bottom:6px;">
       <div style="background:#eee;border-radius:4px;height:5px;overflow:hidden;margin-bottom:4px;">
         <div id="sbBar" style="width:0%;height:5px;background:#dc3545;transition:width .3s;"></div>
       </div>
-      <small id="sbText" style="color:#888;font-size:.75rem;"></small>
+      <small id="sbText" style="color:#888;"></small>
     </div>
+    <!-- Proxy durum paneli -->
     <div id="proxyStatus" style="display:none;margin-bottom:8px;background:#f8f9fa;border-radius:6px;padding:8px;font-size:.78rem;"></div>
-    <small id="sbLastFetch" style="color:#888;display:block;font-size:.75rem;"></small>
+    <small id="sbLastFetch" style="color:#888;display:block;"></small>
   </div>
 
+  <!-- Slotlar -->
   <div style="padding:12px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <small style="font-weight:700;text-transform:uppercase;color:#888;letter-spacing:1px;font-size:.72rem;">Slot Yönetimi</small>
+      <small style="font-weight:700;text-transform:uppercase;color:#888;letter-spacing:1px;">Slot Yönetimi</small>
       <button onclick="doSave()"
-        style="background:#198754;color:#fff;border:none;padding:4px 14px;border-radius:4px;cursor:pointer;font-weight:600;font-size:.82rem;">
+        style="background:#198754;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600;">
         ✓ Kaydet
       </button>
     </div>
     <div id="sbSlots"></div>
   </div>
+
 </div>
 
-<!-- ══ SAYFA ══ -->
+<!-- ====== SAYFA ====== -->
 <div class="container py-3">
 
   <!-- ÜST: SPOR + MAGAZİN -->
-  <div class="row g-3 mb-3 yj-row-stretch">
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-top">
-        <a id="link-spor" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-spor" src="https://picsum.photos/seed/spor1/800/600" alt="" /></div>
-          <div class="yj-card-body border-top border-danger border-3">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <span class="badge bg-danger" style="font-size:.65rem;">SPOR</span>
-            </div>
-            <h2 class="fw-bold fs-5 mb-1 yj-title" id="title-spor">—</h2>
-            <p class="text-secondary small mb-0 yj-summary" id="summary-spor"></p>
+  <div class="row g-3 mb-3">
+    <div class="col-md-6 d-flex">
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden w-100">
+        <a id="link-spor" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-spor" src="https://picsum.photos/seed/spor1/800/400" class="card-img-top" style="height:260px;object-fit:cover;" />
+          <div class="card-body p-4 border-top border-danger border-3">
+            <h2 class="fw-bold" id="title-spor">—</h2>
+            <p class="text-secondary mb-0" id="summary-spor"></p>
           </div>
         </a>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-top">
-        <a id="link-magazin" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-magazin" src="https://picsum.photos/seed/mag1/800/600" alt="" /></div>
-          <div class="yj-card-body border-top border-warning border-3">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <span class="badge bg-warning text-dark" style="font-size:.65rem;">MAGAZİN</span>
-            </div>
-            <h2 class="fw-bold fs-5 mb-1 yj-title" id="title-magazin">—</h2>
-            <p class="text-secondary small mb-0 yj-summary" id="summary-magazin"></p>
+    <div class="col-md-6 d-flex">
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden w-100">
+        <a id="link-magazin" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-magazin" src="https://picsum.photos/seed/magazin1/800/400" class="card-img-top" style="height:260px;object-fit:cover;" />
+          <div class="card-body p-4 border-top border-warning border-3">
+            <h2 class="fw-bold" id="title-magazin">—</h2>
+            <p class="text-secondary mb-0" id="summary-magazin"></p>
           </div>
         </a>
       </div>
@@ -173,13 +98,13 @@
   </div>
 
   <!-- ANA ALAN -->
-  <div class="row g-3 yj-row-stretch">
+  <div class="row g-3 align-items-start">
 
     <!-- SOL 2/3 -->
-    <div class="col-lg-8 d-flex flex-column gap-3">
+    <div class="col-lg-8">
 
-      <!-- Başlık -->
-      <div class="mb-0 rounded-3 overflow-hidden">
+      <!-- Header -->
+      <div class="mb-3 rounded-3 overflow-hidden">
         <div class="bg-danger px-4 py-3">
           <h1 class="mb-0 fw-black text-white text-uppercase lh-1" style="font-size:2rem;letter-spacing:-1px;">Yeni Journal</h1>
           <small class="text-white text-opacity-75 text-uppercase fw-semibold" style="letter-spacing:3px;font-size:.65rem;">Yeni nesil habercilik...</small>
@@ -191,62 +116,66 @@
       </div>
 
       <!-- Manşet -->
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-manset">
-        <a id="link-manset" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-manset" src="https://picsum.photos/seed/manset/1200/675" alt="" /></div>
-          <div class="yj-card-body border-top border-dark border-3">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <span class="badge bg-dark" style="font-size:.65rem;">GÜNDEM</span>
-              <span class="text-muted" style="font-size:.7rem;" id="date-manset"></span>
-            </div>
-            <h2 class="fw-bold fs-4 mb-1 yj-title" id="title-manset">—</h2>
-            <p class="text-secondary mb-0 yj-summary" id="summary-manset"></p>
+      <div class="card border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+        <a id="link-manset" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-manset" src="https://picsum.photos/seed/manset/900/480" class="card-img-top" style="height:360px;object-fit:cover;" />
+          <div class="card-body p-4 border-top border-dark border-3">
+            <h2 class="card-title fw-bold fs-3" id="title-manset">—</h2>
+            <p class="card-text text-secondary" id="summary-manset"></p>
           </div>
         </a>
       </div>
 
-      <!-- 2×2 Izgara -->
-      <div class="row g-3 yj-row-stretch">
+      <!-- 2x2 -->
+      <div class="row g-3">
         <div class="col-md-6">
-          <div class="card border-0 shadow-sm rounded-3 overflow-hidden h-100">
-            <a id="link-grid1" href="#" target="_blank" class="text-decoration-none text-dark d-flex h-100">
-              <div class="yj-grid-img"><img id="img-grid1" src="https://picsum.photos/seed/g1/400/400" alt="" /></div>
-              <div class="yj-card-body border-start border-dark border-2">
-                <h6 class="fw-bold mb-1 yj-title lh-sm" id="title-grid1">—</h6>
-                <p class="text-secondary small mb-0 yj-summary" id="summary-grid1"></p>
+          <div class="card border-0 shadow-sm h-100 rounded-3 overflow-hidden">
+            <a id="link-grid1" href="#" target="_blank" class="text-decoration-none text-dark">
+              <div class="row g-0 h-100">
+                <div class="col-5"><img id="img-grid1" src="https://picsum.photos/seed/g1/400/300" class="img-fluid h-100 w-100" style="object-fit:cover;" /></div>
+                <div class="col-7"><div class="card-body p-3 border-start border-dark border-2">
+                  <h6 class="fw-bold mb-1" id="title-grid1">—</h6>
+                  <p class="text-secondary small mb-0" id="summary-grid1"></p>
+                </div></div>
               </div>
             </a>
           </div>
         </div>
         <div class="col-md-6">
-          <div class="card border-0 shadow-sm rounded-3 overflow-hidden h-100">
-            <a id="link-grid2" href="#" target="_blank" class="text-decoration-none text-dark d-flex h-100">
-              <div class="yj-grid-img"><img id="img-grid2" src="https://picsum.photos/seed/g2/400/400" alt="" /></div>
-              <div class="yj-card-body border-start border-dark border-2">
-                <h6 class="fw-bold mb-1 yj-title lh-sm" id="title-grid2">—</h6>
-                <p class="text-secondary small mb-0 yj-summary" id="summary-grid2"></p>
+          <div class="card border-0 shadow-sm h-100 rounded-3 overflow-hidden">
+            <a id="link-grid2" href="#" target="_blank" class="text-decoration-none text-dark">
+              <div class="row g-0 h-100">
+                <div class="col-5"><img id="img-grid2" src="https://picsum.photos/seed/g2/400/300" class="img-fluid h-100 w-100" style="object-fit:cover;" /></div>
+                <div class="col-7"><div class="card-body p-3 border-start border-dark border-2">
+                  <h6 class="fw-bold mb-1" id="title-grid2">—</h6>
+                  <p class="text-secondary small mb-0" id="summary-grid2"></p>
+                </div></div>
               </div>
             </a>
           </div>
         </div>
         <div class="col-md-6">
-          <div class="card border-0 shadow-sm rounded-3 overflow-hidden h-100">
-            <a id="link-grid3" href="#" target="_blank" class="text-decoration-none text-dark d-flex h-100">
-              <div class="yj-grid-img"><img id="img-grid3" src="https://picsum.photos/seed/g3/400/400" alt="" /></div>
-              <div class="yj-card-body border-start border-dark border-2">
-                <h6 class="fw-bold mb-1 yj-title lh-sm" id="title-grid3">—</h6>
-                <p class="text-secondary small mb-0 yj-summary" id="summary-grid3"></p>
+          <div class="card border-0 shadow-sm h-100 rounded-3 overflow-hidden">
+            <a id="link-grid3" href="#" target="_blank" class="text-decoration-none text-dark">
+              <div class="row g-0 h-100">
+                <div class="col-5"><img id="img-grid3" src="https://picsum.photos/seed/g3/400/300" class="img-fluid h-100 w-100" style="object-fit:cover;" /></div>
+                <div class="col-7"><div class="card-body p-3 border-start border-dark border-2">
+                  <h6 class="fw-bold mb-1" id="title-grid3">—</h6>
+                  <p class="text-secondary small mb-0" id="summary-grid3"></p>
+                </div></div>
               </div>
             </a>
           </div>
         </div>
         <div class="col-md-6">
-          <div class="card border-0 shadow-sm rounded-3 overflow-hidden h-100">
-            <a id="link-grid4" href="#" target="_blank" class="text-decoration-none text-dark d-flex h-100">
-              <div class="yj-grid-img"><img id="img-grid4" src="https://picsum.photos/seed/g4/400/400" alt="" /></div>
-              <div class="yj-card-body border-start border-dark border-2">
-                <h6 class="fw-bold mb-1 yj-title lh-sm" id="title-grid4">—</h6>
-                <p class="text-secondary small mb-0 yj-summary" id="summary-grid4"></p>
+          <div class="card border-0 shadow-sm h-100 rounded-3 overflow-hidden">
+            <a id="link-grid4" href="#" target="_blank" class="text-decoration-none text-dark">
+              <div class="row g-0 h-100">
+                <div class="col-5"><img id="img-grid4" src="https://picsum.photos/seed/g4/400/300" class="img-fluid h-100 w-100" style="object-fit:cover;" /></div>
+                <div class="col-7"><div class="card-body p-3 border-start border-dark border-2">
+                  <h6 class="fw-bold mb-1" id="title-grid4">—</h6>
+                  <p class="text-secondary small mb-0" id="summary-grid4"></p>
+                </div></div>
               </div>
             </a>
           </div>
@@ -257,39 +186,39 @@
 
     <!-- SAĞ 1/3 -->
     <div class="col-lg-4 d-flex flex-column gap-3">
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-side">
-        <a id="link-side1" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-side1" src="https://picsum.photos/seed/s1/600/338" alt="" /></div>
-          <div class="yj-card-body border-top border-dark border-2">
-            <h6 class="fw-bold mb-1 yj-title" id="title-side1">—</h6>
-            <p class="text-secondary small mb-0 yj-summary" id="summary-side1"></p>
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <a id="link-side1" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-side1" src="https://picsum.photos/seed/s1/600/300" class="card-img-top" style="height:150px;object-fit:cover;" />
+          <div class="card-body p-3 border-top border-dark border-2">
+            <h6 class="fw-bold" id="title-side1">—</h6>
+            <p class="text-secondary small mb-0" id="summary-side1"></p>
           </div>
         </a>
       </div>
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-side">
-        <a id="link-side2" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-side2" src="https://picsum.photos/seed/s2/600/338" alt="" /></div>
-          <div class="yj-card-body border-top border-dark border-2">
-            <h6 class="fw-bold mb-1 yj-title" id="title-side2">—</h6>
-            <p class="text-secondary small mb-0 yj-summary" id="summary-side2"></p>
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <a id="link-side2" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-side2" src="https://picsum.photos/seed/s2/600/300" class="card-img-top" style="height:150px;object-fit:cover;" />
+          <div class="card-body p-3 border-top border-dark border-2">
+            <h6 class="fw-bold" id="title-side2">—</h6>
+            <p class="text-secondary small mb-0" id="summary-side2"></p>
           </div>
         </a>
       </div>
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-side">
-        <a id="link-side3" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-side3" src="https://picsum.photos/seed/s3/600/338" alt="" /></div>
-          <div class="yj-card-body border-top border-dark border-2">
-            <h6 class="fw-bold mb-1 yj-title" id="title-side3">—</h6>
-            <p class="text-secondary small mb-0 yj-summary" id="summary-side3"></p>
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <a id="link-side3" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-side3" src="https://picsum.photos/seed/s3/600/300" class="card-img-top" style="height:150px;object-fit:cover;" />
+          <div class="card-body p-3 border-top border-dark border-2">
+            <h6 class="fw-bold" id="title-side3">—</h6>
+            <p class="text-secondary small mb-0" id="summary-side3"></p>
           </div>
         </a>
       </div>
-      <div class="card border-0 shadow-sm rounded-3 overflow-hidden yj-side">
-        <a id="link-side4" href="#" target="_blank" class="text-decoration-none text-dark d-flex flex-column h-100">
-          <div class="yj-img-wrap"><img id="img-side4" src="https://picsum.photos/seed/s4/600/338" alt="" /></div>
-          <div class="yj-card-body border-top border-dark border-2">
-            <h6 class="fw-bold mb-1 yj-title" id="title-side4">—</h6>
-            <p class="text-secondary small mb-0 yj-summary" id="summary-side4"></p>
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <a id="link-side4" href="#" target="_blank" class="text-decoration-none text-dark">
+          <img id="img-side4" src="https://picsum.photos/seed/s4/600/300" class="card-img-top" style="height:150px;object-fit:cover;" />
+          <div class="card-body p-3 border-top border-dark border-2">
+            <h6 class="fw-bold" id="title-side4">—</h6>
+            <p class="text-secondary small mb-0" id="summary-side4"></p>
           </div>
         </a>
       </div>
@@ -304,16 +233,15 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════════
-//  SABİTLER
-// ══════════════════════════════════════════════════════════════
+
+// ─── Sabitler ───────────────────────────────────────────────
 const CATEGORIES = {
-  spor:    { label:"SPOR",    feed:"https://www.yenijournal.com/spor/feed" },
-  magazin: { label:"MAGAZİN", feed:"https://www.yenijournal.com/magazin/feed" },
-  gundem:  { label:"GÜNDEM",  feed:"https://www.yenijournal.com/gundem/feed" },
-  siyaset: { label:"SİYASET", feed:"https://www.yenijournal.com/siyaset/feed" },
-  ekonomi: { label:"EKONOMİ", feed:"https://www.yenijournal.com/ekonomi/feed" },
-  dunya:   { label:"DÜNYA",   feed:"https://www.yenijournal.com/dunya/feed" },
+  spor:    { label:"SPOR",    url:"https://www.yenijournal.com/spor/feed" },
+  magazin: { label:"MAGAZİN",url:"https://www.yenijournal.com/magazin/feed" },
+  gundem:  { label:"GÜNDEM", url:"https://www.yenijournal.com/gundem/feed" },
+  siyaset: { label:"SİYASET",url:"https://www.yenijournal.com/siyaset/feed" },
+  ekonomi: { label:"EKONOMİ",url:"https://www.yenijournal.com/ekonomi/feed" },
+  dunya:   { label:"DÜNYA",  url:"https://www.yenijournal.com/dunya/feed" },
 };
 
 const SLOTS_DEFAULT = {
@@ -334,291 +262,307 @@ const SLOT_LABELS = {
   spor:"Üst Sol — Spor", magazin:"Üst Sağ — Magazin",
   manset:"Manşet", grid1:"Izgara 1", grid2:"Izgara 2",
   grid3:"Izgara 3", grid4:"Izgara 4",
-  side1:"Sağ 1", side2:"Sağ 2", side3:"Sağ 3", side4:"Sağ 4",
+  side1:"Sağ Kart 1", side2:"Sağ Kart 2", side3:"Sağ Kart 3", side4:"Sağ Kart 4"
 };
 
-const STORE_DATA  = "yj_data_v2";
-const STORE_SLOTS = "yj_slots_v2";
-const STORE_MANUAL = "yj_manual_v2"; // manuel linkle doldurulmuş slotlar
+const STORE_DATA  = "yj_data";
+const STORE_SLOTS = "yj_slots";
 
-// ══════════════════════════════════════════════════════════════
-//  DEPO
-// ══════════════════════════════════════════════════════════════
-function loadData()   { try { return JSON.parse(localStorage.getItem(STORE_DATA));  } catch { return null; } }
-function loadSlots()  { try { const r=JSON.parse(localStorage.getItem(STORE_SLOTS)); return r?{...SLOTS_DEFAULT,...r}:{...SLOTS_DEFAULT}; } catch { return {...SLOTS_DEFAULT}; } }
-function loadManual() { try { return JSON.parse(localStorage.getItem(STORE_MANUAL))||{}; } catch { return {}; } }
-function saveData(d)  { localStorage.setItem(STORE_DATA,   JSON.stringify(d)); }
-function saveSlots(s) { localStorage.setItem(STORE_SLOTS,  JSON.stringify(s)); }
-function saveManual(m){ localStorage.setItem(STORE_MANUAL, JSON.stringify(m)); }
+// ─── Yardımcılar ─────────────────────────────────────────────
+function loadData()  { try { return JSON.parse(localStorage.getItem(STORE_DATA));  } catch { return null; } }
+function loadSlots() { try { const r = JSON.parse(localStorage.getItem(STORE_SLOTS)); return r ? {...SLOTS_DEFAULT,...r} : {...SLOTS_DEFAULT}; } catch { return {...SLOTS_DEFAULT}; } }
+function saveData(d) { localStorage.setItem(STORE_DATA,  JSON.stringify(d)); }
+function saveSlots(s){ localStorage.setItem(STORE_SLOTS, JSON.stringify(s)); }
 
-let gData   = loadData();
-let gSlots  = loadSlots();
-let gManual = loadManual(); // { slotName: { title, url, image, summary } }
-
-function getArticle(slotName) {
-  // Manuel link varsa onu kullan
-  if (gManual[slotName]) return gManual[slotName];
-  const s = gSlots[slotName];
-  if (!s || !gData) return null;
-  return (gData[s.category]||[])[s.index] || null;
+function getArticle(data, slots, slot) {
+  const s = slots[slot]; if (!s || !data) return null;
+  return (data[s.category] || [])[s.index] || null;
 }
 
-// ══════════════════════════════════════════════════════════════
-//  RENDER
-// ══════════════════════════════════════════════════════════════
+// ─── CORS Proxy ile doğrudan HTML çekme ──────────────────────
+const PROXY  = u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`;
+const PROXY2 = u => `https://corsproxy.io/?${encodeURIComponent(u)}`;
+
+async function fetchPage(url) {
+  for (const fn of [PROXY, PROXY2]) {
+    try {
+      const res = await fetch(fn(url), { signal: AbortSignal.timeout(12000) });
+      if (!res.ok) continue;
+      const data = await res.json();
+      return data.contents || data;
+    } catch(e) { continue; }
+  }
+  return null; // proxy başarısız → null döner, Claude API'ye fallback
+}
+
+function extractNewsFromHtml(html, catKey) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const items = [];
+  const seen = new Set();
+
+  doc.querySelectorAll('a').forEach(a => {
+    const href = a.href || '';
+    if (!href.includes('yenijournal.com')) return;
+    if (/\/(kategori|etiket|yazar|tag|category|author|page|rss|hava|namaz|nobetci|trafik|futbol)\//i.test(href)) return;
+    if (seen.has(href)) return;
+    const title = (a.getAttribute('title') || a.textContent || '').trim().replace(/\s+/g, ' ');
+    if (title.length < 15) return;
+    seen.add(href);
+
+    // Yakın img ara
+    let image = '';
+    const imgEl = a.querySelector('img') || a.closest('article,div,li')?.querySelector('img');
+    if (imgEl) {
+      image = imgEl.getAttribute('data-src') || imgEl.getAttribute('src') || '';
+      if (image && !image.startsWith('http')) image = '';
+      if (image && (image.includes('no_headline') || image.includes('logo'))) image = '';
+    }
+    items.push({ title, url: href, image, summary: '' });
+  });
+  return items;
+}
+
+// ─── Claude API fallback (web_search ile) ────────────────────
+async function fetchCatViaAPI(key) {
+  const cat = CATEGORIES[key];
+  const prompt = `site:yenijournal.com/${key} haber başlıkları
+
+Yenijournal.com sitesinin "${cat.label}" kategorisindeki en güncel haberlerden 10 tanesini listele.
+Her haber için şu JSON formatını kullan. Sadece JSON array döndür, başka hiçbir şey yazma:
+[
+  {
+    "title": "Haber başlığı",
+    "url": "https://www.yenijournal.com/tam-haber-url",
+    "summary": "Haberin kısa özeti (1-2 cümle)",
+    "image": ""
+  }
+]
+Sadece gerçek, yenijournal.com'a ait URL'leri kullan. Uydurma.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      tools: [{ type: "web_search_20250305", name: "web_search" }],
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  if (!res.ok) throw new Error("API HTTP " + res.status);
+  const data = await res.json();
+
+  const text = (data.content || [])
+    .filter(b => b.type === "text")
+    .map(b => b.text)
+    .join("");
+
+  const match = text.match(/\[\s*\{[\s\S]*?\}\s*\]/);
+  if (!match) { console.warn(key, "API JSON bulunamadı:", text.slice(0, 200)); return []; }
+
+  const items = JSON.parse(match[0]);
+  return items
+    .filter(a => a.title && a.title.length >= 8)
+    .map(a => ({
+      title:   a.title.trim(),
+      url:     a.url || "#",
+      image:   a.image || "",
+      summary: (a.summary || "").trim().slice(0, 180),
+    }));
+}
+
+// ─── Ana çekme fonksiyonu: Proxy → API fallback ───────────────
+async function fetchCat(key) {
+  const cat = CATEGORIES[key];
+  // 1. Önce doğrudan HTML çekmeyi dene
+  try {
+    const html = await fetchPage(cat.url.replace('/feed', ''));
+    if (html) {
+      const items = extractNewsFromHtml(html, key);
+      if (items.length >= 3) {
+        console.log(key, "proxy ile çekildi:", items.length, "haber");
+        return items.slice(0, 15);
+      }
+    }
+  } catch(e) {
+    console.warn(key, "proxy hatası:", e.message);
+  }
+  // 2. Proxy başarısız → Claude API
+  console.log(key, "API fallback'e geçiliyor...");
+  return await fetchCatViaAPI(key);
+}
+
+// ─── Render sayfası ──────────────────────────────────────────
+let gData  = loadData();
+let gSlots = loadSlots();
+
 function fillSlot(name, art) {
   if (!art) return;
-  const el = id => document.getElementById(id+"-"+name);
-  if (el("title"))   el("title").textContent   = art.title   || "—";
-  if (el("summary")) el("summary").textContent = art.summary || "";
-  if (el("link"))    el("link").href            = art.url     || "#";
-  if (el("date") && art.date) el("date").textContent = art.date;
-  if (el("img")) {
-    if (art.image) {
-      el("img").src = art.image;
-      el("img").onerror = function(){ this.style.display="none"; this.closest(".yj-img-wrap,.yj-grid-img").style.display="none"; };
-    } else {
-      // Fotoğraf yoksa resim alanını gizle
-      const wrap = el("img").closest(".yj-img-wrap,.yj-grid-img");
-      if (wrap) wrap.style.display = "none";
-    }
+  const q = id => document.getElementById(id+"-"+name);
+  if (q("title"))   q("title").textContent   = art.title   || "—";
+  if (q("summary")) q("summary").textContent = art.summary || "";
+  if (q("link"))    q("link").href           = art.url     || "#";
+  if (q("img") && art.image) {
+    q("img").src = art.image;
+    q("img").onerror = function(){ this.src = "https://picsum.photos/seed/"+name+"/800/400"; };
   }
 }
 
 function renderPage() {
-  Object.keys(SLOTS_DEFAULT).forEach(n => fillSlot(n, getArticle(n)));
+  Object.keys(SLOTS_DEFAULT).forEach(n => fillSlot(n, getArticle(gData, gSlots, n)));
 }
 
+// Tarih
 document.getElementById("dateText").textContent =
   new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
 if (gData) renderPage();
 
-// ══════════════════════════════════════════════════════════════
-//  RSS ÇEKİCİ — proxy zinciri ile
-// ══════════════════════════════════════════════════════════════
-const PROXIES = [
-  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-];
-
-async function proxyFetch(url, timeoutMs=10000) {
-  let lastErr = "bilinmiyor";
-  for (const makeProxy of PROXIES) {
-    const ctrl = new AbortController();
-    const t = setTimeout(()=>ctrl.abort(), timeoutMs);
-    try {
-      const r = await fetch(makeProxy(url), { signal: ctrl.signal });
-      clearTimeout(t);
-      if (!r.ok) { lastErr="HTTP "+r.status; continue; }
-      const text = await r.text();
-      if (text && text.length > 200) return text;
-      lastErr = "boş yanıt";
-    } catch(e) { clearTimeout(t); lastErr=e.message; }
-  }
-  throw new Error(lastErr);
-}
-
-// RSS feed parse et
-async function fetchRSS(key) {
-  const feed = CATEGORIES[key].feed;
-  const xml = await proxyFetch(feed);
-  const doc = new DOMParser().parseFromString(xml, "text/xml");
-  const items = [...doc.querySelectorAll("item")].slice(0,12);
-  return items.map(item => {
-    const title   = item.querySelector("title")?.textContent?.trim() || "";
-    const url     = item.querySelector("link")?.textContent?.trim()
-                 || item.querySelector("guid")?.textContent?.trim() || "#";
-    const summary = (item.querySelector("description")?.textContent||"")
-                    .replace(/<[^>]+>/g,"").trim().slice(0,180);
-    // RSS enclosure veya media:content ile resim
-    let image = item.querySelector("enclosure")?.getAttribute("url")
-             || item.querySelector("media\\:content,content")?.getAttribute("url")
-             || "";
-    // description içinde img src bul
-    if (!image) {
-      const m = (item.querySelector("description")?.textContent||"").match(/src=["']([^"']+\.(jpg|jpeg|png|webp)[^"']*)/i);
-      if (m) image = m[1];
-    }
-    const pubDate = item.querySelector("pubDate")?.textContent?.trim()||"";
-    const date = pubDate ? new Date(pubDate).toLocaleDateString("tr-TR",{day:"numeric",month:"long"}) : "";
-    return { title, url, image, summary, date };
-  }).filter(a => a.title.length >= 6);
-}
-
-// og:meta çek (tek haber URL için)
-async function fetchOGMeta(url) {
-  const html = await proxyFetch(url, 12000);
-  const get = prop => {
-    const m = html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]+content=["']([^"'<>]+)["']`,"i"))
-           || html.match(new RegExp(`<meta[^>]+content=["']([^"'<>]+)["'][^>]+(?:property|name)=["']${prop}["']`,"i"));
-    return m ? m[1].trim() : "";
-  };
-  const title   = get("og:title")       || get("twitter:title");
-  const summary = (get("og:description")|| get("twitter:description")||"").slice(0,180);
-  const image   = get("og:image")       || get("twitter:image");
-  if (!title) throw new Error("Başlık bulunamadı");
-  return { title, summary, image, url };
-}
-
-// ══════════════════════════════════════════════════════════════
-//  ANA GÜNCELLEME
-// ══════════════════════════════════════════════════════════════
-async function doFetch() {
-  const btn  = document.getElementById("sbFetch");
-  const prog = document.getElementById("sbProgress");
-  const status = document.getElementById("proxyStatus");
-  btn.disabled=true; btn.textContent="Çekiliyor...";
-  prog.style.display="block"; status.style.display="none";
-
-  const result={};
-  const keys=Object.keys(CATEGORIES);
-  let errCount=0;
-  for (let i=0;i<keys.length;i++) {
-    const k=keys[i];
-    document.getElementById("sbBar").style.width=Math.round(((i+.5)/keys.length)*100)+"%";
-    document.getElementById("sbText").textContent=CATEGORIES[k].label+" RSS çekiliyor...";
-    try {
-      result[k] = await fetchRSS(k);
-      // RSS'te resim yoksa ilk haberin og:image'ini çek
-      for (let j=0;j<Math.min(3,result[k].length);j++) {
-        if (!result[k][j].image && result[k][j].url!="#") {
-          try {
-            const og = await fetchOGMeta(result[k][j].url);
-            result[k][j].image = og.image;
-            if (!result[k][j].summary) result[k][j].summary = og.summary;
-          } catch {}
-        }
-      }
-    } catch(e) { console.warn(k,"RSS hatası:",e.message); result[k]=[]; errCount++; }
-    await new Promise(r=>setTimeout(r,200));
-  }
-
-  document.getElementById("sbBar").style.width="100%";
-  result._fetched = new Date().toISOString();
-  saveData(result);
-  gData = result;
-  prog.style.display="none";
-  btn.disabled=false; btn.innerHTML="↻ Haberleri Güncelle";
-
-  status.style.display="block";
-  status.innerHTML = errCount===0
-    ? `<span style="color:#198754;">✓ Tüm kategoriler güncellendi.</span>`
-    : `<span style="color:#dc3545;">⚠ ${errCount} kategori yüklenemedi. (CORS/proxy sorunu)</span>`;
-
-  document.getElementById("sbLastFetch").textContent =
-    "Son: "+new Date().toLocaleString("tr-TR");
-  renderSbSlots();
-  renderPage();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  MANUEL LINK ÇEKİCİ
-// ══════════════════════════════════════════════════════════════
-async function fetchFromUrl(slotName) {
-  const input = document.getElementById("urlInput-"+slotName);
-  const url = (input?.value||"").trim();
-  if (!url) { alert("Link girin."); return; }
-
-  const btn  = input.nextElementSibling;
-  const prev = document.getElementById("preview-"+slotName);
-  btn.disabled=true; btn.textContent="⏳";
-  prev.innerHTML="<em style='color:#888;'>Çekiliyor...</em>";
-
-  try {
-    const art = await fetchOGMeta(url);
-    gManual[slotName] = art;
-    saveManual(gManual);
-    fillSlot(slotName, art);
-    prev.innerHTML=`<a href="${art.url}" target="_blank" style="color:#198754;" title="${art.title}">✓ ${art.title}</a>`;
-    input.value="";
-  } catch(e) {
-    prev.innerHTML=`<span style="color:#dc3545;">✗ ${e.message}</span>`;
-  } finally { btn.disabled=false; btn.textContent="↓ Çek"; }
-}
-
-function clearManual(slotName) {
-  delete gManual[slotName];
-  saveManual(gManual);
-  fillSlot(slotName, getArticle(slotName));
-  renderSbSlots();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  SİDEBAR
-// ══════════════════════════════════════════════════════════════
+// ─── Sidebar ─────────────────────────────────────────────────
 function openSidebar() {
-  document.getElementById("sidebar").style.transform="translateX(0)";
-  document.getElementById("overlay").style.display="block";
+  document.getElementById("sidebar").style.transform = "translateX(0)";
+  document.getElementById("overlay").style.display = "block";
   renderSbSlots();
-  const d=loadData();
-  document.getElementById("sbLastFetch").textContent =
-    d?._fetched ? "Son: "+new Date(d._fetched).toLocaleString("tr-TR") : "Henüz güncelleme yok.";
+  updateSbDate();
 }
 function closeSidebar() {
-  document.getElementById("sidebar").style.transform="translateX(100%)";
-  document.getElementById("overlay").style.display="none";
+  document.getElementById("sidebar").style.transform = "translateX(100%)";
+  document.getElementById("overlay").style.display = "none";
+}
+
+function updateSbDate() {
+  const d = loadData();
+  document.getElementById("sbLastFetch").textContent =
+    d?._fetched ? "Son: " + new Date(d._fetched).toLocaleString("tr-TR") : "Henüz güncelleme yok.";
 }
 
 function renderSbSlots() {
-  const c=document.getElementById("sbSlots");
-  c.innerHTML="";
-  Object.keys(SLOTS_DEFAULT).forEach(name=>{
-    const slot  = gSlots[name];
-    const art   = getArticle(name);
-    const isManual = !!gManual[name];
-    const opts  = Object.entries(CATEGORIES).map(([k,v])=>
+  const c = document.getElementById("sbSlots");
+  c.innerHTML = "";
+  Object.keys(SLOTS_DEFAULT).forEach(name => {
+    const slot = gSlots[name];
+    const art  = getArticle(gData, gSlots, name);
+    const opts = Object.entries(CATEGORIES).map(([k,v]) =>
       `<option value="${k}" ${k===slot.category?"selected":""}>${v.label}</option>`).join("");
 
-    const div=document.createElement("div");
-    div.className="sb-slot";
-    div.innerHTML=`
-      <div class="sb-slot-title">${SLOT_LABELS[name]}${isManual?` <span style="color:#0d6efd;font-weight:400;">(manuel)</span>`:""}</div>
-      <div class="sb-url-row">
-        <input type="url" id="urlInput-${name}" placeholder="Link yapıştır → otomatik çeker..."
-          onkeydown="if(event.key==='Enter')fetchFromUrl('${name}')">
-        <button onclick="fetchFromUrl('${name}')">↓ Çek</button>
-        ${isManual?`<button onclick="clearManual('${name}')" style="background:#6c757d;" title="Manüeli sil, RSS'e dön">✕</button>`:""}
-      </div>
-      <div class="sb-meta-row">
-        <select data-slot="${name}" onchange="onSlotChange(this)" style="flex:1;">${opts}</select>
+    const div = document.createElement("div");
+    div.style.cssText = "margin-bottom:14px;padding:10px;background:#f8f9fa;border-radius:8px;";
+    div.innerHTML = `
+      <div style="font-weight:700;font-size:.8rem;margin-bottom:6px;color:#333;">${SLOT_LABELS[name]}</div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <select data-slot="${name}" data-type="cat" onchange="onSlotChange(this)"
+          style="flex:1;padding:4px 6px;border:1px solid #ccc;border-radius:4px;font-size:.82rem;">
+          ${opts}
+        </select>
         <input type="number" data-slot="${name}" data-type="idx" onchange="onSlotChange(this)"
-          value="${slot.index}" min="0" max="14" style="width:48px;text-align:center;">
+          value="${slot.index}" min="0" max="14"
+          style="width:52px;padding:4px 6px;border:1px solid #ccc;border-radius:4px;font-size:.82rem;text-align:center;">
       </div>
-      <div class="sb-preview" id="preview-${name}">
-        ${art?`<a href="${art.url}" target="_blank" style="color:#dc3545;text-decoration:none;">${art.title}</a>`:"<em style='color:#aaa;'>— veri yok —</em>"}
+      <div style="font-size:.75rem;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="preview-${name}">
+        ${art ? `<a href="${art.url}" target="_blank" style="color:#dc3545;text-decoration:none;" title="${art.title}">${art.title}</a>` : "<em style='color:#aaa;'>— veri yok —</em>"}
       </div>`;
     c.appendChild(div);
   });
 }
 
 function onSlotChange(el) {
-  const name  = el.dataset.slot;
+  const name = el.dataset.slot;
   const catEl = document.querySelector(`select[data-slot="${name}"]`);
-  const idxEl = document.querySelector(`input[data-type="idx"][data-slot="${name}"]`);
-  gSlots[name]={ category:catEl.value, index:parseInt(idxEl?.value)||0 };
-  const art=getArticle(name);
-  const prev=document.getElementById("preview-"+name);
-  if(prev) prev.innerHTML=art
-    ?`<a href="${art.url}" target="_blank" style="color:#dc3545;text-decoration:none;">${art.title}</a>`
-    :"<em style='color:#aaa;'>— veri yok —</em>";
+  const idxEl = document.querySelector(`input[data-slot="${name}"]`);
+  gSlots[name] = { category: catEl.value, index: parseInt(idxEl.value)||0 };
+  const art = getArticle(gData, gSlots, name);
+  const prev = document.getElementById("preview-"+name);
+  if (prev) prev.innerHTML = art
+    ? `<a href="${art.url}" target="_blank" style="color:#dc3545;text-decoration:none;" title="${art.title}">${art.title}</a>`
+    : "<em style='color:#aaa;'>— veri yok —</em>";
+}
+
+async function doProxyTest() {
+  const panel = document.getElementById("proxyStatus");
+  panel.style.display = "block";
+  panel.innerHTML = "<em style='color:#888;'>Bağlantılar test ediliyor...</em>";
+
+  // 1. Proxy testi
+  let proxyOk = false;
+  try {
+    const t0 = Date.now();
+    const res = await fetch(PROXY("https://www.yenijournal.com/"), { signal: AbortSignal.timeout(8000) });
+    const ms = Date.now() - t0;
+    if (res.ok) {
+      proxyOk = true;
+      panel.innerHTML = `<span style="color:#198754;font-weight:700;">✓ CORS Proxy bağlantısı başarılı (${ms}ms)</span><br>`;
+    }
+  } catch(e) {
+    panel.innerHTML = `<span style="color:#e67e00;">⚠ CORS Proxy başarısız (${e.message.slice(0,40)})</span><br>`;
+  }
+
+  // 2. Claude API testi
+  try {
+    const t0 = Date.now();
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 50,
+        messages: [{ role: "user", content: "Sadece 'OK' yaz." }]
+      })
+    });
+    const data = await res.json();
+    const ms = Date.now() - t0;
+    if (res.ok && data.content) {
+      panel.innerHTML += `<span style="color:#198754;font-weight:700;">✓ Claude API bağlantısı başarılı (${ms}ms)</span><br>`;
+      panel.innerHTML += `<small style="color:#555;">${proxyOk ? "Proxy önce denenecek, sonra API." : "Proxy yok — sadece Claude API kullanılacak."}</small>`;
+    } else {
+      panel.innerHTML += `<span style="color:#dc3545;">✗ API hatası: ${data.error?.message || res.status}</span>`;
+    }
+  } catch(e) {
+    panel.innerHTML += `<span style="color:#dc3545;">✗ Claude API bağlantı hatası: ${e.message}</span>`;
+  }
+}
+
+async function doFetch() {
+  const btn = document.getElementById("sbFetch");
+  const prog = document.getElementById("sbProgress");
+  const panel = document.getElementById("proxyStatus");
+  btn.disabled = true; btn.textContent = "Çekiliyor...";
+  prog.style.display = "block";
+  panel.style.display = "none";
+  const result = {};
+  const keys = Object.keys(CATEGORIES);
+  let errorCount = 0;
+  for (let i=0; i<keys.length; i++) {
+    const k = keys[i];
+    document.getElementById("sbBar").style.width = Math.round((i/keys.length)*100)+"%";
+    document.getElementById("sbText").textContent = CATEGORIES[k].label + " haberleri aranıyor...";
+    result[k] = await fetchCat(k);
+    if (result[k].length === 0) errorCount++;
+    await new Promise(r=>setTimeout(r,300));
+  }
+  document.getElementById("sbBar").style.width = "100%";
+  result._fetched = new Date().toISOString();
+  saveData(result);
+  gData = result;
+  prog.style.display = "none";
+  btn.disabled = false; btn.innerHTML = "↻ Haberleri Güncelle";
+  if (errorCount > 0) {
+    panel.style.display = "block";
+    panel.innerHTML = `<span style="color:#dc3545;">⚠ ${errorCount} kategori yüklenemedi. "API Testi" butonuna basın.</span>`;
+  } else {
+    panel.style.display = "block";
+    panel.innerHTML = `<span style="color:#198754;">✓ Tüm kategoriler başarıyla güncellendi.</span>`;
+  }
+  updateSbDate();
+  renderSbSlots();
+  renderPage();
 }
 
 function doSave() {
   saveSlots(gSlots);
   renderPage();
   closeSidebar();
-}
-
-// Sayfa açılışında veri yoksa otomatik çek
-if (!gData) {
-  setTimeout(()=>{
-    document.getElementById("proxyStatus").style.display="block";
-    document.getElementById("proxyStatus").innerHTML=
-      "<em style='color:#888;'>İlk yükleme: haberler otomatik çekiliyor...</em>";
-    doFetch();
-  }, 500);
 }
 </script>
 </body>
